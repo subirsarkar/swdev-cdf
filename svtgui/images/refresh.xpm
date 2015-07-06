@@ -1,0 +1,32 @@
+/* XPM */
+static char *refresh[] = {
+/* width height num_colors chars_per_pixel */
+"    22    22        3            1",
+/* colors */
+". c #808080",
+"# c #000000",
+"a c #7f7f7f",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaa..###.aaaaaaaa",
+"aaaaaaa.#######aaaaaaa",
+"aaaaaa.##.aaaa.#aaaaaa",
+"aaaaaa##.aaaaaaaaaaaaa",
+"aaaaa###aaaaaaa#aaaaaa",
+"aaa#######aaaa###aaaaa",
+"aaaa#####aaaa#####aaaa",
+"aaaaa###aaaa#######aaa",
+"aaaaaa#aaaaaaa###aaaaa",
+"aaaaaaaaaaaaa.##aaaaaa",
+"aaaaaa#.aaaa.##.aaaaaa",
+"aaaaaaa#######.aaaaaaa",
+"aaaaaaaa.###..aaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

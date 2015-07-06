@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>  
+    A Description of the Graphical User Interface to the <FONT COLOR=blue>svtvme</FONT> Library 
+</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#ffffff" LINK="blue" VLINK="red">
+
+<H2>
+A Graphical User Interface to the <FONT color=blue>svtvme</FONT> Library
+</H2>
+<H3>Introduction</H3>
+User interaction with the SVT system is accomplished with the help of a library 
+of functions, written in C and built on top of the FISION library of functions for 
+access to VME. The library, aptly called, <FONT color=blue>svtvme</FONT> has matured 
+a lot over time and it is now appropriate to have a simple Graphical User Interface (GUI) 
+to the underlying library that would allow 
+<UL>
+  <LI>Easy access to all the SVT boards in some uniform fashion</LI>
+  <LI>Diagnostics of individual boards in situ (testing rams/FIFOs/registers etc.) </LI>
+  <LI>Diagnostics of single boards using standard cabling for I/O of test data</LI>
+</UL>
+
+Different single board diagnostic tools, both simple and expert level, which have been 
+in use are described in brief below,
+<UL>
+  <LI> A number of <I>text based</I> and <I>menu driven</I> programs for individual 
+       boards written in C.
+       These programs are simple to use but do not have a  consistent layout for
+       all the SVT boards. This has caused them to remain mostly in the expert
+       domain.</LI>
+  <LI> Random test style extensive multi-board test suite written with a specific
+       goal in mind. </LI>
+  <LI> <FONT COLOR=#104e8b>CORBA/Robin</FONT> remote object protocol based 
+       <FONT COLOR=#2e8b57>cdfvme/svtDaq</FONT> that can accomplish 
+       multi-board tests. This tool is written in Java and although it is quite 
+       complete and configurable it is at the same time rather heavy with 
+       graphics, slow in execution due to overhead of <FONT COLOR=#104e8b>CORBA</FONT> and less 
+       intuitive. The question of maintainability also goes against this application
+       framework.</LI>
+  <LI> Java Native Interface (JNI) over the <FONT COLOR=blue>svtvme</FONT> 
+       C library which allows Java based user interface (reused and simplified from 
+       <FONT COLOR=#2e8b57>svtDaq</FONT>) to access the SVT boards 
+       directly. This option has been considered to be a promising one as all the 
+       power of Java as a GUI toolkit could be used to access the VME directly 
+       without the overhead of <FONT COLOR=#104e8b>CORBA</FONT> which would make the 
+       application lighter and a lot more efficient for simple tasks.</LI>
+  <LI> <FONT COLOR=#ff4500>Interactive Python/JPython</FONT> scripting, 
+       a very simple and powerful way of interacting with the boards. This option has 
+       all the power of menu driven text based tools in addition to being infinitely 
+       configurable. Unfortunately, <FONT COLOR=#ff4500>Python</FONT>, although very 
+       simple and compact, is not the programming language which is as common as C.</LI>
+</UL>
+
+<P>
+From the above description, it is clear that tools are scattered and require a 
+healthy amount of maintenance work. So we proposed to build a light and configurable GUI 
+application, which will incorporate all the advantages of the existing applications,
+in order to be able to use a single user interface to all the SVT boards. For graphics 
+based interface JNI seemed to be the natural choice in the beginning. But, as an all C 
+solution to the problem is preferred to reduce maintenance overhead we looked for and 
+finally found an alternative to using Java/JNI in Gtk+/GNOME. Gtk+/GNOME is the basis 
+of the GNOME desktop on Linux and is likely to be supported at least in the mid-term 
+future although we might be on our own as Gtk+/GNOME is not supported fully yet in CDF 
+online. </P>
+
+<P>Gtk+/GNOME has a very rich set of graphics widgets. The API 
+is simple to use. The GUI builder <FONT color=red>glade</FONT> can help in producing 
+very high quality graphics with very little effort. Unfortunately, 
+<FONT color=red>glade</FONT> produces a monolithic  body of code which defeats 
+the very idea of code reuse. One has to rearrange <FONT color=red>glade</FONT> 
+generated code manually. </P>
+
+<P>
+We quickly built a very preliminary prototype of the application and requested for suggestions
+from the community. After receiving valuable suggestions we went on implementing the
+first version of the application, called <FONT color=green>svtgui</FONT>. We describe
+below the interface in detail.</P>
+
+<H3>Description</H3>
+<P>The application consists of a single window along-with a file browser which makes it
+lightweight and dynamic in nature. As soon as a board is selected/connected the interface 
+changes itself to show Register/Memory/FIFO/Spy list only relevant to that board.
+The main window is divided into five distinct parts as shown in Figure 1, namely
+<UL>
+  <LI>A Menubar and a Toolbar</LI>
+  <LI>A panel containing the Crate/Board/Slot selection pull-down lists</LI>
+  <LI>A notebook containing the following pages</LI>
+    <UL>
+      <LI>Global board status</LI>
+      <LI>Memory operation </LI>
+      <LI>Spy buffer related operation</LI>
+      <LI>Board register read/write/test</LI>
+      <LI>Board FIFO related operation</LI>
+      <LI>Sending data to the board</LI>
+    </UL>
+  <LI>Another notebook widget which contains the input/output text areas in addition
+      to a scripting window.</LI>
+  <LI>A Statusbar at the bottom</LI>
+</UL>
+
+<P>
+One can connect to any arbitrary but valid crate/board/slot combination from the application.
+In the present context, we refer to the final SVT configuration to be used in CDF as 
+the 'Standard Configuration', i.e crates b0svt00 ... b0svt07 and the boards therein. 
+The configuration where any arbitrarily valid board can be opened is referred to as 
+'Custom Configuration'. The application starts by default as a non-standard one. However, The 
+'Standard Configuration', can be selected at run time from the <FONT COLOR=red>Setting</FONT> 
+menu. With non-standard 
+configuration one must click on an <FONT COLOR=blue>svtvme</FONT> operation related button to 
+open the board as well as to update the Register/Memory/FIFO/spy lists in the appropriate 
+pull-down lists. We have singled out the <B>Refresh</B> button which checks,
+<UL>
+  <LI>the internal consistency of the board just opened</LI>
+  <LI>if the board is in Run/Test mode</LI>
+  <LI>the output hold</LI>
+  <LI>all the FIFOs to see if empty</LI>
+  <LI>if the spy buffers are frozen. In addition to that it displays the spy pointer and the 
+      pointer overflow bit for the selected board spy buffer. </LI>
+</UL> 
+
+If the custom option is chosen it is upto the user to choose a valid board whereas for
+the standard option, one cannot edit but can only select valid Crate/Board/Slot combination
+from the pull-down lists which are updated automatically once a valid entry is selected for
+the Crate/Board. For custom option, any SVT related button first connects to the board and 
+updates the Register/Memory/FIFO/spy lists, so only after the lists are updated should one 
+try to look at a different quantity. In order to take advantage of the new functions available
+in the <FONT color=blue>svtvme</FONT> library we are planning to make modification so that 
+both the options describe above appear the same.
+
+<H3>Global Board Status</H3>
+<P>
+The global status window consists of the following as can be seen from Figure 1,
+</P>
+<UL>
+  <LI>Board Initialisation button</LI>
+  <LI>Test/Run mode status display along-with Test Mode <B>Enable/Disable</B> button</LI>
+  <LI>FIFO status display as a single quantity which is green only when all the FIFOs 
+      corresponding to that board are empty</LI>
+  <LI>Output HOLD status</LI>
+  <LI>Reading/Writing of a word at an address a certain number of times</LI>
+  <LI>Board Identifier, namely board type and serial number.</LI>
+</UL>
+
+<P>
+<!-- <A HREF="images/svtgui-global.gif"> -->
+<IMG SRC="images/svtgui-global.gif"><BR><BR>
+Figure 1: Main Window</A></P>
+
+<H3>Board Memory Read/Write/Test/Check Operations</H3>
+<P>
+This panel, shown in figure 2, allows us to test a single memory a number of times.
+One can read a number of words starting at an offset and either display the data in the 
+output text area or dump to a file. In a similar manner one can write a number of words 
+starting at an offset, where the data could be typed in the input text area or taken 
+from a file. This page is not complete and we have to implement operations like 
+<FONT COLOR=red>Check</FONT>, <FONT COLOR=red>Verify</FONT>  etc.
+</P>
+
+<P>
+<!-- <A HREF="images/svtgui-memory.gif"> -->
+<IMG SRC="images/svtgui-memory.gif"><BR><BR> 
+Figure 2: Memory Operation page</P>
+
+<H3>Spy Buffer Reading </H3>
+<P>In this panel one can select a Spy Buffer of a board from the pull down list. 
+Options are provided which allow data to be displayed in the output text
+area or dumped to a file. One can also input the number of words to be read
+or alternatively choose to read the whole buffer. At the bottom row, we provide facilities
+to locally freeze/unfreeze the board spy buffers using the Spy Control board
+which sits in the same crate as that of the board under investigation.</P>
+
+<P>
+<!-- <A HREF="images/svtgui-spy.gif"> -->
+<IMG SRC="images/svtgui-spy.gif"><BR><BR>
+Figure 3: Spy buffer reading page</P>
+
+<H3>Board Register Read/Write/Test Operations</H3>
+<P>
+The board register panel is shown in Figure 4. This is the simplest page of all.
+At a time one can test/read/write five different registers selecting the from the 
+pull down menu. As a default the first five registers of the selected board are
+displayed. The same text fields are used for both read and write operations. The
+'ClearAll' button clears all the input/output text fields. Selecting a new board 
+automatically clears all the input/output text fields.</P>
+
+<P>
+<!-- <A HREF="images/svtgui-reg.gif"> -->
+<IMG SRC="images/svtgui-reg.gif"><BR><BR>
+Figure 4: Board register test/read/write page</P>
+
+<H3>Board FIFO Related Operation</H3>
+<P>
+In this panel, shown in Figure 5, the board FIFO status are shown for individual FIFO.
+Data from FIFO can be read and displayed or dumped to a file. The board FIFO can be 
+selected from a pull-down list.
+</P>
+
+<P>
+<!-- <A HREF="images/svtgui-fifo.gif"> -->
+<IMG SRC="images/svtgui-fifo.gif"><BR><BR>
+Figure 5: Board FIFO page</P>
+
+<H3>Sending Data to SVT Boards</H3>
+<P>
+<FONT color=blue>svtvme</FONT> library provides a number of functions in order 
+to send data to a board,
+</P>
+<UL>
+  <LI>A number of words sent only once at a specified speed</LI>
+  <LI>A number of words sent in a loop</LI>
+  <LI>The same data is sent once again</LI>
+  <LI>The same data is sent again in a loop</LI>
+  <LI>The same data is sent again</LI>
+</UL>
+As shown in Figure 6, one can also choose the data source to be a file or 
+the input area (where each line in the file or the input text area should contain
+one data word in a hex format). One should also specify the number of words 
+to be sent as well.
+
+<P>
+<!-- <A HREF="images/svtgui-send.gif"> -->
+<IMG SRC="images/svtgui-send.gif"><BR><BR>
+Figure 6: Sending data to board</P>
+
+<H3>Usage</H3>
+<P>The application is standalone and can be started simply performing the following,
+<PRE>
+setup svtvme -d
+svtgui  (an alias to $SVTVME_DIR/svtgui/bin/svtgui_Linux)
+</PRE>
+
+<H3>Future</H3>
+In the next version we would like to add the following capabilities to the existing
+application,
+<UL>
+  <LI>Command line arguments</LI>
+  <LI><I>New</I> and <I>Close</I> items in the <B>File</B> menu which will allow us to open 
+      extra windows and to work independently to connect to different boards from the 
+      same application.</LI>
+  <LI>New window with editing capabilities for a large amount of data</LI>
+  <LI>Compare data read with old ones.</LI>
+  <LI>A Python interpreter embedded within the application which makes the tool much more
+      flexible and powerful</LI>
+  <LI>Displaying data in various formats</LI>
+  <LI>Implementing new functionalities available in the <FONT color=blue>svtvme</FONT>
+      library in place of custom code.</LI>
+  <LI>Better look and feel of the UI</LI>
+</UL>
+
+<H4><I>Alessandro Barchiesi and Subir Sarkar<BR> Last update 06/07/2001</I> </H4>
+</BODY> 
+</HTML>

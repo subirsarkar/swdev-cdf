@@ -1,0 +1,229 @@
+/* The main of the application which creates a gnome window, then places
+ * all the children inside and displays. We also handle 'delete' and 
+ * 'destroy' events here.
+ */
+#include <signal.h>
+#include <unistd.h>
+#include "config.h"
+#include <gnome.h>
+
+#include "graph_global.h"
+#include "callbacks.h"
+#include "interface.h"
+
+static void session_die(GnomeClient* client, gpointer client_data);
+static gint session_save(GnomeClient *client, 
+                         gint phase, 
+                         GnomeSaveStyle save_style,
+                         gint is_shutdown, 
+                         GnomeInteractStyle interact_style,
+                         gint is_fast, 
+                         gpointer client_data);
+
+static gint delete_event_cb(GtkWidget* w, GdkEventAny* e, gpointer data);
+static gint destroy_event_cb(GtkWidget* w, GdkEventAny* e, gpointer data);
+
+/* The global GUI components which make GUI access easy */
+extern GlobalComponent svt_gc;
+
+/* Keep a list of all open application windows */
+static GSList *app_list = NULL;
+
+static char *crate_name = "b0svttest00.fnal.gov";
+static char *board_name = "MRG";
+static int  slot_num    = 7;
+static int  auto_con    = 0;
+static char *geometry   = "400x400";
+
+struct poptOption options[] = {
+  {
+    "crate",
+    'c',
+    POPT_ARG_STRING,
+    &crate_name,
+    0,
+    N_("Specify the Crate name at the command line as -c crate_name or --crate crate_name"),
+    N_("CRATE")
+  },
+  { 
+    "board",
+    'b',
+    POPT_ARG_STRING,
+    &board_name,
+    0,
+    N_("Specify the board name at the command line as -b board_name or --board board_name"),
+    N_("BOARD")
+  },
+  { 
+    "slot",
+    's',
+    POPT_ARG_INT,
+    &slot_num,
+    0,
+    N_("Specify the slot number at the command line as -s slot_num or --slot slot_num"),
+    N_("SLOT")
+  },
+  { 
+    "auto",
+    'a',
+    POPT_ARG_INT,
+    &auto_con,
+    0,
+    N_("Specify if the board should be opened by default -a 1/0 or --auto 1/0"),
+    N_("AUTO-CONNECT")
+  },
+  { 
+    "geometry",
+    '\0',
+    POPT_ARG_STRING,
+    &geometry,
+    0,
+    N_("Specify the geometry of the main window as --geometry geom"),
+    N_("GEOMETRY")
+  },
+  {
+    NULL,
+    '\0',
+    0,
+    NULL,
+    0,
+    NULL,
+    NULL
+  }
+};
+
+
+int main (int argc, char *argv[]) {
+  GtkWidget *app;
+
+  poptContext pctx;
+  char **args;
+  GnomeClient *client;
+
+  bindtextdomain(PACKAGE, GNOMELOCALEDIR);  
+  textdomain(PACKAGE);
+  gnome_init_with_popt_table(PACKAGE, VERSION, argc, argv, 
+                             options, 0, &pctx);  
+  /* Argument parsing */
+  args = poptGetArgs(pctx);
+
+  /* Session Management */
+  client = gnome_master_client ();
+  gtk_signal_connect (GTK_OBJECT (client), "save_yourself",
+                      GTK_SIGNAL_FUNC (session_save), argv[0]);
+  gtk_signal_connect (GTK_OBJECT (client), "die",
+                      GTK_SIGNAL_FUNC (session_die), NULL);
+  /* Main app */ 
+  svtgui_initApplication();
+
+#ifdef DEBUG
+  g_print("%s/%s/%d/%d/%s\n", crate_name, board_name, slot_num, auto_con, geometry);
+#endif
+
+  app = svtgui_appNew(crate_name, board_name, slot_num, auto_con, geometry);
+  if (app != NULL) gtk_widget_show_all(app);
+
+  poptFreeContext(pctx);
+
+  gtk_main();
+
+  return 0;
+}
+static void session_die(GnomeClient* client, gpointer client_data) {
+  gtk_main_quit();
+}
+
+static gint session_save (GnomeClient *client, 
+                          gint phase, 
+                          GnomeSaveStyle save_style,
+                          gint is_shutdown, 
+                          GnomeInteractStyle interact_style,
+                          gint is_fast, 
+                          gpointer client_data)
+{
+  gchar **argv;
+  guint argc;
+
+  /* allocate 0-filled, so it will be NULL-terminated */
+  argv = g_malloc0(sizeof(gchar *) * 4);
+  argc = 1;
+
+  argv[0] = client_data;
+
+  if (crate_name) {
+     argv[1] = "--crate";
+     argv[2] = crate_name;
+     argc = 3;
+  }
+  
+  gnome_client_set_clone_command (client, argc, argv);
+  gnome_client_set_restart_command (client, argc, argv);
+
+  return TRUE;
+}
+GtkWidget *svtgui_appNew(const gchar *crate, 
+                         const gchar *board, 
+                         gint slot, 
+                         gint connect, 
+                         const gchar *geometry)
+{
+  GtkWidget *app;
+
+  app = gnome_app_new(PACKAGE, _("Standalone SVT Teststand"));
+
+  svtgui_createMainWindow (app);
+
+  gtk_window_set_policy(GTK_WINDOW(app), FALSE, TRUE, FALSE);
+  gtk_window_set_default_size(GTK_WINDOW(app), 250, 350);
+  gtk_window_set_wmclass(GTK_WINDOW(app), "gui", "svtgui");
+
+  gtk_signal_connect(GTK_OBJECT(app), "delete_event",
+                     GTK_SIGNAL_FUNC(delete_event_cb), NULL);
+  gtk_signal_connect(GTK_OBJECT(app), "destroy", 
+                     GTK_SIGNAL_FUNC(destroy_event_cb), NULL);
+
+  if (geometry != NULL)  {
+    gint x, y, w, h;
+    if (gnome_parse_geometry(geometry, &x, &y, &w, &h)) {
+      if (x != -1) {
+        gtk_widget_set_uposition(app, x, y);
+      }
+      if (w != -1) {
+        gtk_window_set_default_size(GTK_WINDOW(app), w, h);
+      }
+    }
+    else  {
+      g_error(_("Could not parse geometry string `%s'"), geometry);
+    }
+  }
+
+  app_list = g_slist_prepend(app_list, app);
+
+  return app;
+}
+void svtgui_appClose(GtkWidget *app) {
+  g_return_if_fail(GNOME_IS_APP(app));
+
+  app_list = g_slist_remove(app_list, app);
+  gtk_widget_destroy(app);
+
+  if (app_list == NULL) {
+    /* No windows remaining */
+    g_print("No more windows remaining, exit ...\n");
+    gtk_main_quit();
+  }
+}
+
+static gint delete_event_cb(GtkWidget *window, GdkEventAny *e, gpointer data) {
+  svtgui_appClose(window);
+
+  /* Prevent the window's destruction, since we destroyed it 
+   * ourselves with svtgui_app_close()
+   */
+  return TRUE;
+}
+
+static gint destroy_event_cb(GtkWidget *widget, GdkEventAny *e, gpointer data) {
+  gtk_main_quit();
+  return (0);
+}

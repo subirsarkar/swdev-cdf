@@ -1,0 +1,4 @@
+- Global 
+  o    Insert another entry box to display/enter 'word' to be read/written
+       result = svtvme_isEmpty(board, AMS_HIT_FIFO);  uses AMS_HIT_FIFO explicitly. modify
+  o    when a board is selected the 'init' label from 'global' panel disapp.
