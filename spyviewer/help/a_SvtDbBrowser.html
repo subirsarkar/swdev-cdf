@@ -1,0 +1,47 @@
+<HTML>
+<HEAD><TITLE>About SVT Database Browser</TITLE></HEAD>
+<BODY>
+
+<H2>SVT Database Browser</H2>
+
+<FONT size=-1>
+Browse SVT hardware configuration as stored in the Database.
+By default the window displays the active configuration. The 'View' panel 
+displays 
+<UL>
+  <LI>the mapset/hwset filenames with their respective CRCs and timestamps.</LI>
+  <LI>the names of the Pattern, SSMap, fcon files for each of the 12 wedges.
+      For fcon, only one filename (barrel 0) for each wedge is displayed.</LI>
+</UL>
+
+One can display SVT configuration for an arbitray Run Number for which the configuration 
+exists. The 'Reload Active' once again restores the active configuration. 
+
+<BR><BR>
+The 'Operation' panel allows one to 
+
+<UL>
+  <LI>display one file at a time</LI>
+  <LI>save selected file (s)</LI>
+  <LI>save all the files shown in the list in the current directory</LI>
+  <LI>validate or compute CRCs of the selected file(s)</LI>
+</UL>
+
+A Pupup Menu has been attached to the list in the 'Operations' panel to 
+<UL>
+  <LI>select Multiple element selection mode</LI>
+  <LI>clear existing selection</LI>
+  <LI>select all the items</LI>
+  <LI>display names of all the mapset files present in DB</LI>
+  <LI>display names of all the hwset file present in DB</LI>
+  <LI>return to the active configuration</LI>
+</UL>
+
+I've used Bill's C code from Java for validation or computation of CRC.<BR>
+
+<BR>
+<I>Subir Sarkar</I>
+</FONT>
+
+</BODY>
+</HTML>

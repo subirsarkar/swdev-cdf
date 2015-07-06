@@ -1,0 +1,44 @@
+<HTML>
+<HEAD><TITLE>Welcome to SVT Spy Buffer Monitoring</TITLE></HEAD>
+<BODY>
+
+<H4>Welcome to SVT Spy Buffer Monitoring</H4>
+
+Spy Buffer Monitoring and Analysis software is used to monitor the CDF Silicon 
+Vertex Trigger performance in real time. The following basic tasks can be
+performed with this software
+
+<UL>
+  <LI> Display SVT crate error status in detail, i.e statistics of 
+       global errors from the spy buffers and board specific errors
+       from board registers. One can select the crate which indicates
+       the appearance of an error and logically explore the detail
+       upto the spy buffers.</LI>
+  <LI> Perform both expert and higher level error reporting.</LI>
+  <LI> <I>Try to recover from SVT errors.</I></LI>
+  <LI> Display and manipulate spy buffers read and analysed by the crate 
+       processes from various SVT boards.</LI>
+  <LI> Display histograms of interesting quantities which are created
+       and published by the several SVT crate processes. </LI>
+  <LI> Configure spy buffer reading and subsequent analysis.</LI>
+  <LI> Respond to RC Control state transition commands and accordingly
+       control the functioning of the crate process. </LI>
+</UL> 
+
+The application is a SmartSockets client which communicates with the SVT 
+crate processes and the spy manager (and possibly with the Run Control) and 
+displays and transforms data read by the crate processes. It uses multiple 
+threads of execution. In the ideal situation, the main thread of execution 
+waits for the partitioning to be done and then sits in the GUI mainloop. 
+One can use the main thread to configure analysis related settings whereas 
+a new thread manages SmartSockets communications. For more technical information 
+and for API level documentations please go to the 'Help' content of the main 
+application.<BR>
+
+<BR>
+Any constructive feedback is welcome.<BR>
+
+<BR>
+<I>SVT Rome Group</I>
+</BODY>
+</HTML>

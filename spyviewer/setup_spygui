@@ -1,0 +1,13 @@
+setenv PATH ${JAVA_HOME}/bin:${PATH}
+setenv SVTMON_DIR $HOME/work/spyviewer  # change
+setenv SVTMON_DATA_DIR ${SVTMON_DIR}
+setenv SVTMON_WWWDIR ${SVTMON_DIR}
+setenv BEAM_WWWDIR ${SVTMON_DIR}
+setenv CLASSPATH /usr/share/java/ant.jar
+setenv CLASSPATH \
+${CLASSPATH}:${SVTMON_DIR}/classes/jython.jar:${SVTMON_DIR}/classes/jas.jar:${SVTMON_DIR}/classes/hep.jar
+setenv CLASSPATH ${CLASSPATH}:${SVTMON_DIR}/classes/ss.jar
+setenv CLASSPATH ${CLASSPATH}:${SVTMON_DIR}/classes/daqmsg.jar
+setenv CLASSPATH ${CLASSPATH}:${SVTMON_DIR}/classes/classes111.zip
+setenv CLASSPATH ${CLASSPATH}:${SVTMON_DIR}/classes/:${SVTMON_DIR}
+alias spyView "java -Dswing.aatext=true -Xms6m -Xmx192m config.svt.SplashWindow"

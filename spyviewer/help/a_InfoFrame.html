@@ -1,0 +1,84 @@
+<HTML>
+<HEAD><TITLE>About Spy Buffer Display Window</TITLE></HEAD>
+<BODY>
+
+<H2>Individual Spy Buffer Display Window</H2>
+
+<FONT size=+0>
+Displays individual Spy Buffer informations in a number of ways. The window consists of 
+<OL>
+  <LI>The <FONT COLOR=green>MenuBar</FONT></LI>
+  <UL>
+    <LI><FONT COLOR=blue>File</FONT>; <FONT COLOR=green>Connect</FONT> to, 
+        <FONT COLOR=red>Disconnect</FONT> from the SmartSockets server;  
+         usual basic services.</LI>
+    <LI><FONT COLOR=blue>Options</FONT>; When run online the display automatically 
+        gets updated with most recent data. <B>Auto update</B> of display 
+        can be switched on/off. Turning <B>Debug</B> option on is expert only.</LI>
+    <LI><FONT COLOR=blue>View</FONT>; one can view (1) all the words, (2) EoE words alone. For
+        Physics format, the first option does not show the decoded EE but the raw data display
+        contains all the words</LI>
+    <LI><FONT COLOR=blue>Action</FONT>; (1) Open a tiny tool to decode SVT words into physics
+        format interactively, (2) Analyse the Spy buffer dump. This is the most important
+        analysis-level feature of the tool.</LI>
+  </UL>
+  <LI>The <FONT COLOR=green>ToolBar</FONT>; when used in standalone mode, contains 
+      <FONT COLOR=green>Connect</FONT> 
+      and <FONT COLOR=red>Disconnect</FONT> buttons to establish/stop communication with 
+      the SmartSockets Server</LI>
+  <LI>A <FONT COLOR=green>Tree</FONT> showing all the Crate->Board->SpyBuffers. The list is 
+      dynamically built from crate status messages. This list allows us to browse all the 
+      buffers from a single window. As soon as the first set of Svt Status messages is 
+      received from all the crates, the application unsubscribes for Crate Status message. 
+      The tree shows the list of all the buffers of the SVT system but by default only a 
+      few buffers are sent from the crates as messages. We distinguish those buffers which
+      contain data from others which do not by changing the icons as soon as data is
+      received for that buffer.</LI>
+  <LI><FONT COLOR=green>Spy Buffer Dispplay</FONT> panel. The panel consists of,
+    <UL>
+      <LI>Global Error (EE) status, which consists of
+        <UL>
+          <LI>Spy Buffer status window, 
+            <UL>
+              <LI>Spy pointer value</LI>
+              <LI>Freeze status bit</LI>
+              <LI>Pointer overflow bit</LI>
+            </UL>
+          </LI>
+          <LI>Most recent status of the 8 individual EE Error bits</LI>
+          <LI>EE error informations in some more detail in tabular form.
+             The table (at the bottom of Global Error window) displays 
+             <UL>
+               <LI> Number of times EE errors have occurred and 
+                    the % fraction of occurrance of EE errors in the latest buffer.</LI>
+               <LI> Total cumulative number of times EE errors have occurred and 
+                    the % fraction of occurrance of EE errors.</LI>
+             </UL>
+          </LI>
+        </UL>
+      </LI>
+
+      <LI>Buffer display, (1) Board format, (2) Raw Hexadecimal format.</LI> 
+      <LI>A plotting widget, consists of a canvas and a list. For each type of buffer a few
+          basic quatities are histogrammed. There is an experimental interactive histogramming
+          panel also (The 'Command' tab next to the 'List' tab which displays histograms
+          which are craeted and filled automatically.)</LI>
+    </UL>
+  </LI>
+  <LI>The <FONT COLOR=green>Message Logger</FONT> area, display SmartSockets related messages etc.</LI>
+  <LI>The <FONT COLOR=green>StatusBar</FONT>; displays,
+    <UL>
+      <LI>Status messages like 'Ready', 'Updating', Tooltip on buttons, menu etc.</LI>
+      <LI>Fully qualified name of the buffer</LI>
+      <LI>Total number of words received for that buffer</LI>
+      <LI>'All' or 'EE' words</LI>
+      <LI>Available data formats </LI>
+    </UL>
+  </LI>
+</OL>
+
+<I>Subir Sarkar, Last Updated: 06/05/2003, 17:22</I>
+</FONT>
+
+</BODY>
+</HTML>

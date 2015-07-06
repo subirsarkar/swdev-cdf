@@ -1,0 +1,57 @@
+<HTML>
+<HEAD><TITLE>Spy Buffer Analysis Configuration</TITLE></HEAD>
+<BODY>
+
+<H2>Spy Buffer Analysis Configuration</H2>
+
+<FONT size=-1>
+Configures the spymon analysis options in the SVT crates. A single message is created, 
+either for one crate at a time or a common one valid for all the crates and published 
+via SmartSockets. The configuration options are described in detail below.
+
+<UL>
+  <LI>Mode of monitoring,
+    <UL> 
+       <LI>wait for Run_Control partition to become available </LI>
+       <LI>do routine tasks even when the partition does not come into being.</LI>
+     </UL></LI>
+  <LI>Run Mode, 
+    <UL> 
+       <LI>Routine pole and reading of spy buffers even if there is
+           no freeze from outside. This option has to be elaborated in future
+           to make it more flexible.</LI>
+    </UL></LI>
+  <LI> Spy buffer Analysis options
+     <UL>
+        <LI>Analyse/Skip the buffer under consideration</LI>
+        <LI>Read Spy buffers</LI>
+        <LI>Dump to disk</LI>
+        <LI>Fill and publish histograms</LI>
+        <LI>Perform board/crate based simulation</LI>
+     </UL></LI>
+  <LI>For a selected buffer,
+     <UL>
+        <LI>Frequency of buffer reading</LI> 
+        <LI>Number of words to be read</LI>
+        <LI>Maximum number of words to be dumped</LI>
+      </UL></LI>
+  <LI> Type of histograms to be booked(?)/filled/published
+    <UL>
+       <LI>Event Error histograms</LI>
+       <LI>Standard monitoring histograms</LI>
+       <LI>Histograms of physics quantities of interest</LI>
+       <LI>histograms to be consulted by SVT Expert</LI>
+    </UL></LI>
+</UL>
+
+NB. As we do now we'll probably continue booking the histograms statically in the 
+crate processes and only broadly modify the fill/publish options. If on the otherhand, 
+we want to configure options on a histogram-by-histogram basis, it becomes much more 
+involved. In that case the extra step will be to read somehow the list of booked histograms 
+from each crate and then select them for filling/publishing. <BR><BR>
+
+<I>Subir Sarkar</I>
+</FONT>
+
+</BODY>
+</HTML>

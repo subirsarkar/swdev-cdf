@@ -1,0 +1,80 @@
+<HTML>
+<HEAD><TITLE>SVT Crate Error Status Summary Window</TITLE></HEAD>
+<BODY>
+
+<H2>SVT Crate Error Status Summary Window</H2>
+
+<FONT size=-1>
+Emulates the SVT hardware crate/board configuration (without cable connections). 
+Standard colors for different elements, i.e board panels
+are used which help us recognise the boards without explicitly labeling them.
+We have also added two more help items to explain board panel color code
+and the buttons on the board panels. For more information and board color 
+codes consult the images stored in the svt page. In particular, look at 
+<FONT color=red>
+http://www.pi.infn.it/cdf/svt/intdoc/infrastructure/cratelayout.GIF</FONT>.<BR>
+
+<BR>
+Boards which do not have Spy buffers 
+are passive elements. The crate CPU panel is a button which shows a 
+summary of status of all the Spy buffers which belong to that crate. Alternatively,
+one can click on the buttons which show the (logical) crate names to display the same
+informations.<BR>
+
+<BR>Error Color Codes:
+
+<UL>
+  <LI><font color=red>Red</font>&nbsp&nbsp&nbsp - Error has occurred in that element</LI>
+  <LI><font color=green>Green</font> - Running alright as Spy Monitoring finds it</LI>
+  <LI><font color=yellow>Yellow</font> - Element not available for monitoring</LI>
+</UL>
+
+This window should summarise all the relevant informations about the
+functioning of SVT and hence may be open all through.<BR>
+
+<BR>
+The LEDs on each board represent the following,
+
+<UL>
+  <LI>Top Panel
+  <UL>
+     <LI><FONT color=blue>EE Event related error</FONT> indicator. Error is 
+         <FONT color=red>ON</FONT> if any of 
+         the spy buffers in that board has an EE error. Selecting
+         this button will show which buffers have errors.</LI>
+     <LI><FONT color=blue>Spy Bufer related error</FONT> indicator. 
+         Like the one above, but
+         refers to the error related to Spy Buffer analysis, like
+         simulation etc.</LI>
+     <LI><FONT color=blue>Output Hold Error</FONT> indicator </LI>
+  </UL></LI>
+  <LI>Bottom Panel
+  <UL>
+     <LI><FONT color=blue>Board-in-Run/Test mode</FONT> indicator</LI>
+     <LI><FONT color=blue>CDF/SVT error</FONT> indicator, an OR of the two</LI>
+     <LI><FONT color=blue>Board error register</FONT> indicator. 
+         It is an OR of all the 
+         board error registers. Selecting this button shows 
+         all the error registers for that board and indicates
+         where the error has occurred. </LI>
+  </UL></LI>
+</UL>
+
+The LEDs are buttons as well and can be selected to display details of the occurrance 
+of an error. By default a new frame is opened following a button click which contains
+error informations for the whole system. One can, alternatively, check
+<FONT COLOR=red>Show Errors on Separate Windows</FONT> to views informations only for
+a single element.
+
+The <B>Options</B> menu contains two items, namely <I>Show TMode Warning</I> 
+and <I>Show Output Hold Warning</I>. At each iteration, once the panels are updated, 
+we check if any board is in test mode and if the board output is in hold. If so and 
+the above options are selected, warning is issued. A <I>Reset Errors</I> is also added
+which will reset errors on the client side.<BR>
+
+<BR>
+<I>Subir Sarkar</I>
+</FONT>
+
+</BODY>
+</HTML>
