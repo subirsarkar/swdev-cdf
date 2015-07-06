@@ -1,0 +1,106 @@
+INCLUDE_DIR = -I../../include/messages -I$(SMARTSOCKETS_DIR)/include -I$(DAQMSG_DIR)/include 
+
+
+# -I$(FER_DIR)/src/runControl 
+
+COMPILER  = ${VXCC}
+
+LIBDIR := ${SVTMON_LD_PATH}
+SVTMON_DAQMSG_INC = ${SVTMON_DIR}/include/messages
+
+
+GenericErrorPack.o: GenericErrorPack.c $(SVTMON_DAQMSG_INC)/GenericError.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX GenericErrorPack.c\
+        -o $(LIBDIR)/$@ 
+
+GenericErrorUnpack.o: GenericErrorUnpack.c $(SVTMON_DAQMSG_INC)/GenericError.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX GenericErrorUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTEventMessagePack.o: SVTEventMessagePack.c $(SVTMON_DAQMSG_INC)/SVTEventMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTEventMessagePack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTEventMessageUnpack.o: SVTEventMessageUnpack.c $(SVTMON_DAQMSG_INC)/SVTEventMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTEventMessageUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+EventFracPack.o: EventFracPack.c $(SVTMON_DAQMSG_INC)/EventFrac.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX EventFracPack.c\
+        -o $(LIBDIR)/$@ 
+
+EventFracUnpack.o: EventFracUnpack.c $(SVTMON_DAQMSG_INC)/EventFrac.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX EventFracUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+HistoMessagePack.o: HistoMessagePack.c  $(SVTMON_DAQMSG_INC)/HistoMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX HistoMessagePack.c\
+        -o $(LIBDIR)/$@ 
+
+HistoMessageUnpack.o: HistoMessageUnpack.c $(SVTMON_DAQMSG_INC)/HistoMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX HistoMessageUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+HistoCollectionMessagePack.o: HistoCollectionMessagePack.c $(SVTMON_DAQMSG_INC)/HistoCollectionMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX HistoCollectionMessagePack.c\
+        -o $(LIBDIR)/$@ 
+
+HistoCollectionMessageUnpack.o: HistoCollectionMessageUnpack.c $(SVTMON_DAQMSG_INC)/HistoCollectionMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX HistoCollectionMessageUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+SpyConfigPack.o: SpyConfigPack.c  $(SVTMON_DAQMSG_INC)/SpyConfig.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SpyConfigPack.c\
+        -o $(LIBDIR)/$@ 
+
+SpyConfigUnpack.o: SpyConfigUnpack.c  $(SVTMON_DAQMSG_INC)/SpyConfig.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SpyConfigUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTBoardStatusElementPack.o: SVTBoardStatusElementPack.c  $(SVTMON_DAQMSG_INC)/SVTBoardStatusElement.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTBoardStatusElementPack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTBoardStatusElementUnpack.o: SVTBoardStatusElementUnpack.c  $(SVTMON_DAQMSG_INC)/SVTBoardStatusElement.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTBoardStatusElementUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTSpyBufferStatusElementPack.o: SVTSpyBufferStatusElementPack.c  $(SVTMON_DAQMSG_INC)/SVTSpyBufferStatusElement.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTSpyBufferStatusElementPack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTSpyBufferStatusElementUnpack.o: SVTSpyBufferStatusElementUnpack.c  $(SVTMON_DAQMSG_INC)/SVTSpyBufferStatusElement.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTSpyBufferStatusElementUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTCrateStatusMessagePack.o: SVTCrateStatusMessagePack.c  $(SVTMON_DAQMSG_INC)/SVTCrateStatusMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTCrateStatusMessagePack.c\
+        -o $(LIBDIR)/$@ 
+
+SVTCrateStatusMessageUnpack.o: SVTCrateStatusMessageUnpack.c  $(SVTMON_DAQMSG_INC)/SVTCrateStatusMessage.h
+	$(COMPILER) $(INCLUDE_DIR) -DT_OS_VXWORKS -DT_OS_UNIX SVTCrateStatusMessageUnpack.c\
+        -o $(LIBDIR)/$@ 
+
+
+
+
+
+.IGNORE:
+
+
+objects :=  $(patsubst %.c, %.o,$(wildcard *.c))
+
+all: $(objects)
+	${VXLD} -o ${LIBDIR}/svtmonDaqmsg.o $(addprefix ${LIBDIR}/,$(objects))
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,84 @@
+UNAME       = $(shell uname)
+ifeq ($(UNAME),Linux)
+  MAKEDEPEND  = $(shell which makedepend)
+else
+  MAKEDEPEND  = /cdf/people1/cdf_svt/bin/makedepend_IRIX
+endif
+OBJECT_DIR  = ${SVTMON_LD_PATH}
+LIB_NAME    = framework
+SRCS        = $(wildcard *.c)
+FER_SRCS    = GenericAckPack.c GenericAckUnpack.c \
+              ReadoutListElementPack.c ReadoutListElementUnpack.c \
+              ReadoutListPack.c ReadoutListUnpack.c \
+              SVTAMBListElementPack.c SVTAMBListElementUnpack.c \
+              SVTAMSListElementPack.c SVTAMSListElementUnpack.c \
+              SVTHBListElementPack.c SVTHBListElementUnpack.c \
+              SVTHFListElementPack.c SVTHFListElementUnpack.c \
+              SVTMRGListElementPack.c SVTMRGListElementUnpack.c \
+              SVTReadoutListPack.c  SVTReadoutListUnpack.c \
+              SVTSCListElementPack.c SVTSCListElementUnpack.c \
+              SVTTFListElementPack.c SVTTFListElementUnpack.c 
+
+SRCS += $(FER_SRCS)
+
+INCLUDE_DIR = -I$(FER_DIR)/src/runControl \
+              -I$(SMARTSOCKETS_DIR)/include -I$(SVTVME_DIR)/include \
+              -I$(MERLIN_DIR)/include -I$(DAQMSG_DIR)/include
+CCFLAGS     = -DSMART_SOCKS $(INCLUDE_DIR) -I${SVTMON_DIR}/include/messages
+CC          = rtlink -g
+
+lib$(LIB_NAME).a : $(patsubst %.c,%.o,$(SRCS))
+	ar ruv $@ $^
+	mv $@ $(OBJECT_DIR)
+	mv $^ $(OBJECT_DIR)
+	@echo "library done"
+
+create_link : 	 
+	@echo "Creating link ..."
+	ln -s ${FER_DIR}/src/runControl/GenericAckPack.c .
+	ln -s ${FER_DIR}/src/runControl/GenericAckUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/ReadoutListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/ReadoutListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/ReadoutListPack.c .
+	ln -s ${FER_DIR}/src/runControl/ReadoutListUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTAMBListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTAMBListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTAMSListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTAMSListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTHBListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTHBListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTHFListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTHFListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTMRGListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTMRGListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTReadoutListPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTReadoutListUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTSCListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTSCListElementUnpack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTTFListElementPack.c .
+	ln -s ${FER_DIR}/src/runControl/SVTTFListElementUnpack.c .
+
+delete_link :
+	-rm $(FER_SRCS)
+            
+%.o: %.c  
+	$(CC) $(CCFLAGS)  -c $< -o $@ 
+
+# makedepend
+depend: $(SRCS:.c=.c.dep)
+	cat $(notdir $^) > Makefile.dep
+	-rm -f $(notdir $^) $(patsubst %,%.bak,$(notdir $^))
+%.dep:
+	touch $(notdir $@)
+	$(MAKEDEPEND) -f$(notdir $@) -- $(CCFLAGS) -- $*
+include Makefile.dep
+
+# Ignore errors, continue compilation
+
+.IGNORE :
+
+# Clean
+
+.PHONY   : clean
+clean :
+	-rm $(patsubst %.c,%.o,$(SRCS)) 
