@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  
+   "http://www.w3.org/TR/2000/REC-xhtml1-20000126/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+<head>
+<title>Histogram Viewer</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="css, stylesheets, form" />
+<link rel="stylesheet" type="text/css" href="/mon/ajax/css/v.css" />
+<link rel="stylesheet" type="text/css" href="/mon/ajax/css/tab-view.css" />
+<link rel="stylesheet" type="text/css" href="/mon/ajax/tree-view/css/folder-tree-static.css" />
+<link rel="stylesheet" type="text/css" href="/mon/ajax/css/tooltip.css" />
+
+<script type="text/javascript" src="/mon/ajax/js/prototype.js"></script> 
+<script type="text/javascript" src="/mon/ajax/js/tab-view.js"></script> 
+<script type="text/javascript" src="/mon/ajax/tree-view/js/folder-tree-static.js"></script> 
+<script type="text/javascript" src="/mon/ajax/js/jviewer.js"></script> 
+<style type="text/css">
+
+body {
+  padding: 1px;
+  background-color: #afd0ed;
+  font-family: sans-serif;
+}
+form { 
+  color:#000; 
+  font-family: sans-serif;
+  font-size: 10pt; 
+  font-weight:normal;
+}
+
+div {
+  overflow: hidden;
+}
+
+img {
+  margin:0px 0px 5px 5px;
+}
+
+label {
+  font-weight:normal;
+}
+fieldset {
+  border: 1px solid #777;
+  padding: 1.0%;
+}
+legend {
+  color: #ffaa88;
+  background-image: url('/mon/ajax/images/gmarble.png');
+  border: 1px solid #777;
+  padding: 1px 10px;
+  font-weight:normal;
+}
+select {
+  background-image: url('/mon/ajax/images/ruler.png');
+  border: 1px solid #000;
+}
+button {
+  background-image: url('/mon/ajax/images/marble.png');
+  border:1px outset;
+  color: #000;
+}
+input[type=checkbox] {
+  /* background-image: url('/mon/ajax/images/lmarble.png'); */
+  border: 1px inset;
+}
+input[type=text] {
+  /* background-image: url('/mon/ajax/images/gmarble.png'); */
+}
+input[type=image] {
+  background-image: url('/mon/ajax/images/lmarble.png');
+  padding: 0.5%;
+  border: 1px outset;
+  color: #000;
+  padding-left: 0.5%;
+  margin-top: 1.0%;
+  margin-bottom: -1%;
+}
+input[type=submit] {
+  background-image: url('/mon/ajax/images/lmarble.png');
+  border: 1px outset;
+  color: #000;
+}
+br {
+  clear: left;
+}
+div#scrollarea {
+  height: 233px;
+  width: 100%;
+  overflow: auto;
+  background: #fff;
+  color: black;
+  border: 1px solid black;
+}
+.logger
+{
+  width: 100%;
+  height: 150px;
+  margin: -2px 0px -2px 0px;
+  border: 1px solid black;
+  overflow: auto;
+}
+</style>
+</head>
+
+<body>
+<div id="dhtmltooltip"></div>
+<script type="text/javascript" src="/mon/ajax/js/tooltip.js"></script>
+<form class="form" name="Form1" method="GET" action="javascript:void%200">
+  <div>
+    <div id="divimg" class="bloc1" style="width:55.8%;height:100%;float:left;">
+      <fieldset>
+        <legend>Drawing Canvas</legend>
+        <img onmouseover="JViewer.RedoCurrentPlots();"
+                      id="drawingcanvas"
+                     src="/mon/ajax/images/blank.png" 
+                   style="float:right;border:1px solid black; margin:0px 0px 5px 5px;"
+                   width="100%"
+                  height="450px"
+                    name="canvas">
+        </img>
+        <br/>
+        <input 
+                      type="checkbox"
+                     style="margin-right:1%;margin-left:-0.5%;"
+                        id="autoupdateopt" 
+                   onclick="JViewer.AutoUpdate();"
+               onmouseover="ddrivetip('Toggle auto-update of the selected plot(s)','#ffffc0', 250);"
+                onmouseout="hideddrivetip();"
+                      name="autoupdate">Auto update
+        </input>
+    
+        <input name="getpdf" 
+                 id="getpdf"
+              value="Get PDF" 
+              style="width:15%;margin-left:57%;padding:0.2%"
+            onclick="JViewer.ShowPDF();" 
+               type="submit">
+        </input>
+        <select name="showpdfopt"
+                  id="showpdfoption"
+           <option value="show">Show</option>
+           <option value="ask">Ask</option>
+         </select>
+      </fieldset>
+    </div>
+    <div id="divctl" class="bloc2" style="width:44%; float:right;">
+      <fieldset>
+         <legend>Drawing Controls</legend>
+         <div class="bloc3" style="padding-bottom:0.7%;">
+           <fieldset class="fs1">
+             <label class="label"
+                    style="text-align:right;padding-right:1%;">
+             Run:
+             </label>
+    
+             <select name="run" 
+                       id="runoption"
+                 onchange="JViewer.RequestPlots();"
+                    style="width:20%;text-align:left;margin-right:0.1%;">
+             </select>
+    
+             <input name="refreshrunbutton" 
+                      id="refreshruns" 
+                   value="reload" 
+                   style="height:2%;padding:0.2% 0.7%;
+                          margin-top:-1%; margin-left:0.0%;margin-bottom:-1%;margin-right:2%;"
+             onMouseover="ddrivetip('Update run list from the server','#ffffc0', 190);"
+              onMouseout="hideddrivetip();"
+                 onclick="JViewer.RequestRunList();" 
+                    type="image"
+                     src="/mon/ajax/images/reload.png">
+             </input>
+    
+             <input name="listbutton" 
+                      id="listbutton"
+                   value="Get Canvas List" 
+                   style="width:27%;margin-left:3.0%;padding:0.2%;"
+                 onclick="JViewer.RequestCanvasList();" 
+             onMouseover="ddrivetip('This operation may take a while, please be patient','#ffffc0', 300);"
+              onMouseout="hideddrivetip();"
+                    type="submit">
+             </input>
+    
+             <input type="checkbox" 
+                   style="margin-left:3.0%;margin-right:1%;"
+                      id="consumeronly" 
+                    name="consumer"
+             onMouseover="ddrivetip('List only a subset of histograms','#ffffc0', 190);"
+              onMouseout="hideddrivetip();">
+                    Consumer only
+             </input>
+           </fieldset>
+         </div>
+         <div class="bloc4" style="padding-bottom:1%;">
+           <div id="dhtmlgoodies_tabView1">
+             <div class="dhtmlgoodies_aTab">
+               <select size=12 multiple
+                      style="width:100%;font-size:10pt;"
+                       name="CanvasListArea"
+                         id="canvaslistarea"
+                 ondblclick="JViewer.RequestSinglePlot(this);">
+               </select>
+               <br/>    
+               
+               <input type="text"
+                     style="width:58%;border:1px solid #000" 
+                     value=""
+                        id="finditem" 
+                      name="finditem">
+               </input>
+               
+               <input name="findbutton" 
+                        id="findinput"
+                     value="Find" 
+                     style="width:10%;margin-top:1%;padding:0.2%"
+                   onclick="JViewer.FindItem();" 
+                      type="submit">
+               </input>
+               
+               <input name="selectall" 
+                        id="selectall"
+                     value="SelectAll" 
+                     style="width:15%;margin-top:1%;padding:0.2%"
+                   onclick="JViewer.ListSelectAll('select');" 
+                      type="submit">
+               </input>
+               
+               <input name="plotbutton" 
+                        id="plotbutton"
+                     value="Plot" 
+                     style="width:10%;margin-left:3.3%;padding:0.2%"
+                   onclick="JViewer.RequestPlots();" 
+                      type="submit">
+               </input>
+             </div>
+             <div class="dhtmlgoodies_aTab">
+               <div id="scrollarea">
+                 <div class="bloc" id="treeviewid" style="width:500px;">
+                 </div> 
+               </div>
+             </div>
+           </div>
+         </div>
+         <div id="dhtmlgoodies_tabView2">
+           <div class="dhtmlgoodies_aTab">
+               <input type="checkbox" 
+                     class="check" 
+                     style="margin-right:2%;margin-top:0%"
+                        id="logy" 
+                      name="logy">Toggle logy
+               </input>
+             
+               <label for="a2"
+                    style="margin-left:15%">
+               X Range:</label> 
+               <input type="text"
+                     style="width:13%;border:1px solid #000;" 
+                     value=""
+                        id="lrange" 
+                      name="lrange">
+               </input>
+               <input type="text" 
+                     class="field" 
+                     style="width:13%;border:1px solid #000" 
+                     value=""
+                        id="urange" 
+                      name="urange">
+               </input>
+               <input type="checkbox" 
+                     class="check" 
+                     style="margin-right:2%;margin-left:2.8%"
+                        id="forcexrange" 
+               onmouseover="ddrivetip('enforce x-range even for multiple plots','#ffffc0', 250);"
+                onmouseout="hideddrivetip();"
+                      name="forcex">Force
+               </input>
+               <br/>
+             
+               <input type="checkbox"
+                        id="comparison"
+                     style="margin-right:2%;margin-top:0%;"
+                      name="comparison">Compare with run
+               </input>
+               <select name="refrun" 
+                         id="refrunoption"
+                      style="width:20%;text-align:left;margin-left:46.1%;margin-top:1%;">
+               </select>
+               <br/>
+             
+               <input type="checkbox" 
+                        id="multiple"
+                     style="margin-right:2%;margin-top:0%;"
+                      name="multiple">Multiple Plots
+               </input> 
+               <label for="a3"
+                    style="margin-bottom:1px;text-align:right;
+                      margin-left:40.1%;padding-right:1%;">
+               rows:
+               </label> 
+               <input type="text"
+                     style="width:5%;border:1px solid #000;margin-top:1%;" 
+                     value="2"
+                        id="rows" 
+                      name="rows">
+               </input>
+               <label for="a4"
+                      style=";margin-bottom:1px;text-align:right;
+                      padding-left:1%;padding-right:1%;">
+               cols:
+               </label> 
+               <input type="text" 
+                     style="width:5%;border:1px solid #000;" 
+                     value="2"
+                        id="cols" 
+                      name="cols">
+               </input>
+               <br/>
+             
+               <input type="checkbox"
+                     style="margin-right:2%;"
+                        id="slideshow"
+                      name="slideshow">Slideshow
+               </input>
+             
+               <input name="start" 
+                        id="start"
+                     value="|<<" 
+                     style="margin-left:39%;"
+                   onclick="JViewer.ShowFirst();" 
+                      type="image"
+                       src="/mon/ajax/images/player_start.png">
+               </input>
+             
+               <input name="previous" 
+                        id="previous"
+                     value="<<" 
+                   onclick="JViewer.ShowPrev();" 
+                      type="image"
+                       src="/mon/ajax/images/player_rew.png">
+               </input>
+             
+               <input name="play" 
+                        id="play" 
+                     value=">" 
+                   onclick="JViewer.RunSlideShow();" 
+                      type="image"
+                       src="/mon/ajax/images/player_play.png">
+               </input>
+             
+               <input name="stop" 
+                        id="stop"
+                     value="||" 
+                   onclick="JViewer.StopSlideShow();" 
+                      type="image"
+                       src="/mon/ajax/images/player_stop.png">
+               </input>
+             
+               <input name="next" 
+                        id="next"
+                     value=">>" 
+                   onclick="JViewer.ShowNext();" 
+                      type="image"
+                       src="/mon/ajax/images/player_fwd.png">
+               </input>
+             
+               <input name="end" 
+                        id="end"
+                     value=">>|" 
+                   onclick="JViewer.ShowLast();" 
+                      type="image"
+                       src="/mon/ajax/images/player_end.png">
+               </input>
+           </div>
+           <div class="dhtmlgoodies_aTab">
+               <input type="checkbox" 
+                     style="float:left;margin-right:2%;margin-top:1.1%;"
+                        id="enablefit"
+                   onclick="JViewer.EnablePanel();"
+                      name="slideshow">Enable/Disable Fit Panel 
+               </input>
+               <br/>
+    
+               <label class="label"
+                    style="float:left;margin-left:23%;text-align:right;padding-right:1.8%;margin-top:2%;">
+               Function:
+               </label>
+    
+               <select name="fit" disabled
+                         id="fitfunction"
+                      style="width:18%;text-align:left;margin-top:1%;"
+                   onchange="JViewer.IsUserFunction();">
+                 <option>gaus</option>
+                 <option>expo</option>
+                 <option>poln</option>
+                 <option>landau</option>
+                 <option>user</option>
+               </select>
+    
+               <label class="label"
+                      style="margin-left:1%">
+               Fit Range:</label> 
+               <input type="text" disabled
+                     style="width:42%;border:1px solid #000;" 
+                     value=""
+                        id="fitrange" 
+                      name="fitrange">
+               </input>
+               <br/>
+    
+               <label class="label"
+                      style="float:left;text-align:right;margin-left:8%;padding-right:2%;margin-top:1%;">
+               Expression:
+               </label> 
+               <input type="text" disabled 
+                     style="width:78%;border:1px solid #000;margin-top:1%;" 
+                     value=""
+                        id="fitexp" 
+                      name="expression">
+               </input>
+               <br/>
+    
+               <label class="label"
+                      style="float:left;text-align:right;padding-right:2.5%;margin-top:1%;">
+               Parameters:
+               </label> 
+               <input type="text" disabled
+                     style="width:68%;border:1px solid #000;margin-top:1%;" 
+                     value=""
+                        id="fitparams" 
+                      name="parameter">
+               </input>
+               <label class="label"
+                      style="text-align:left;margin-left:0.1%;margin-top:1%;">
+               (CSV)
+               </label> 
+           </div>
+           <div class="dhtmlgoodies_aTab">
+               <select size=7
+                      style="width:100%;height:100px;font-size:9pt;"
+                       name="MacroListArea"
+                         id="macrolistarea"
+                 ondblclick="JViewer.RunMacro();">
+                 <option>FittingDemo</option>
+               </select>
+           </div>
+    
+         </div>
+         <div>
+           <fieldset style="margin-top:0.5%;margin-left:0%;">
+             <label class="label"
+                    style="text-align:right;padding-right:1%;">
+             Logger Options:
+             </label>
+              <input type="checkbox"
+                       style="margin-right:1.5%;margin-left:2.5%;"
+                          id="logevent" 
+                        name="logevent">Log Event
+              </input>
+              <input type="checkbox"
+                       style="margin-right:1.5%;margin-left:1.5%;"
+                          id="logdebug" 
+                        name="logdebug">Log Debug
+              </input>
+              <input name="clearlog" 
+                       id="clearlog"
+                    value="Clear Log" 
+                    style="width:20%;margin-left:15%;padding:0.2%"
+                  onclick="JViewer.ClearLogger();" 
+                     type="submit">
+              </input>
+           </fieldset>             
+         </div>
+      </fieldset>
+    </div> 
+  </div>
+  <div id="loggerpanel" style="margin-top:0.2%;width:100%;">
+     <div id="dhtmlgoodies_tabView3" style="float:left;">
+       <div class="dhtmlgoodies_aTab">
+           <textarea class="logger"
+                        id="eventlogger"
+                  readonly="readonly">
+           </textarea>  
+        </div>
+        <div class="dhtmlgoodies_aTab">
+           <textarea class="logger"
+                        id="errorlogger"
+                  readonly="readonly"
+                     style="color:red;">
+           </textarea>  
+        </div>
+        <div class="dhtmlgoodies_aTab">
+           <textarea class="logger"
+                        id="debuglogger"
+                  readonly="readonly">
+           </textarea>  
+        </div>
+     </div>
+  </div>
+  <div>
+    <div id="progressbar" style="float:left;margin-top:0.5%;margin-left:1%;visibility:hidden">
+      <img id="loadingid"
+           src="/mon/ajax/images/loading.gif"
+           style="margin-bottom:-3px;padding-bottom:0px;">
+      </img>
+      <label class="label"
+                id="datatypeid"
+             style="text-align:left;">
+      </label>
+    </div>
+    <div style="float:right;margin-top:0.4%;margin-right:1%;">
+      <label><B>Developed by</B>: Subir Sarkar, INFN-Roma1</label>
+    </div>
+  </div>
+</form>
+</body>
+</html>
