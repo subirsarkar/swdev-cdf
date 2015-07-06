@@ -1,0 +1,100 @@
+This file briefly describes the way one can regenerate the JNI interface to 
+svtvme as and when needed. In particular as soon as new constants are added
+to the header file, one must regenerate the interface constants file 
+(SvtvmeConstants.java) and compile it, then create the new shared library,
+otherwise the Java application will try to access wrong registers values, 
+if the new additions break the old order.
+
+The Makefile is not yet automatic enough to take care of everything, 
+and that is where this README comes handy.
+
+I have divided the svtvme_public.h into two parts
+
+1. SvtvmeConstants.java  -  A java interface files containing declaration
+                            and definition of constants alone. One can
+                            use the constants in a Java program as
+                            SvtvmeConstants.NAME_OF_THE_CONSTANT, or
+                            alternatively one can implement the interface
+                            file in one's class and then use unqualified
+                            names.
+
+2. SvtvmeImpl.java       -  All the public methods of svtvme go here.
+                            I have created a few convenience methods as 
+                            well. If new functions are added to 
+                            svtvme_public.h, one has to add the 
+                            corresponding native method in this
+                            file, compile and generate the JNI header file
+                            with the new function and implement the function 
+                            in the corresponding C file (I hope I'll be 
+                            available to do it when needed, nevertheless, 
+                            I shall describe how to do it below.)
+
+All the Java classes are in the package (module) named 'jsvtvme'. For JPython
+it is absolutely needed. When one wants to import any definition, Python 
+looks for a module which should contain those definitions and a Python module 
+maps to a Java package.
+
+
+Creating Interface Constants:
+----------------------------
+setup svtvme -d (either on Linux or on Irix)
+cd $SVTVME_DIR/Native/tool
+gmake clean    # delete the C executable which creates the interface file
+gmake all      # Compile, excute 'GetConstants' and create the interface file
+               # and copy it to $SVTVME_DIR/Native/src directory. Thanks to
+               # Stefano one can retrieve all the defined objects in an 
+               # automatic way now.
+cd ..
+setup java -q java2  # (if not done already)
+gmake classes   # I have to find out a way such that only the modified 
+                # files are recompiled
+gmake doc       # this should contain class specific documentation
+                # does not seem to work, to be fixed 
+
+Creating JNI shared library (do both on Linux and Irix)
+----------------------------
+gmake clean
+gmake depend
+gmake
+
+Then we are ready to use it. The shared libraries are linked from 
+$SVTVME_LD_PATH so in the java program on a particular platform
+java.lang.System.loadLibrary("SvtvmeImpl) is guaranteed to load the
+correct architecture.
+
+
+The Hard Part: Implementing the Interface:
+-----------------------------------------
+
+-- Add the prototype of the new C function in SvtvmeImpl.java as
+
+# self is boardHandle here
+public native int svtvme_getSomething(int self); 
+
+the specifier 'native' tells and requires that the method does not 
+have a body in Java.
+
+gmake classes   # once again for my ignorance all the Java files 
+                # are compiled now
+gmake header    # The same, I'll correct it sometime
+
+-- In 'include/jsvtvme_SvtvmeImpl.h' you get a prototype
+
+JNIEXPORT jint JNICALL Java_jsvtvme_SvtvmeImpl_svtvme_1getSomething
+  (JNIEnv *, jobject, jint);
+
+-- You are required to implement the function in 'src/SvtvmeImpl.c' as
+
+/*
+ * Implementation of <svtvme_getSomething>
+ */
+JNIEXPORT jint JNICALL 
+ Java_jsvtvme_SvtvmeImpl_svtvme_1getSomething
+  (JNIEnv *env, jobject obj, jint self)
+{
+   return ((jint)svtvme_setSomething(getCHandle(bHandle));
+}
+
+
+-- Subir
+   Rome, 10/19/2000

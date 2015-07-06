@@ -1,0 +1,6 @@
+setup java v1_2_2
+setup svtvme -d
+setenv CLASSPATH ${CLASSPATH}:/cdf/people2/sarkar/svtvme/Native/classes
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/cdf/people2/sarkar/svtvme/Native/lib
+setup jpython
+

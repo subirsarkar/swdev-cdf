@@ -1,0 +1,87 @@
+Documentation
+-------------
+
+This file refers to the "svtLurk" program, written by Federico Cozzi
+(Italian summer student) during September 2000.
+
+Files
+-----
+
+svtLurk
+svtClasses.py
+svtLurk.py
+b0svt0[0-7].config
+GIF/red.gif
+GIF/yellow.gif
+GIF/green.gif
+
+How to run
+----------
+
+I do this:
+1) log on to b0dap08.fnal.gov
+2) type
+   cd ~cozzi/vme
+3) type
+   ./svtLurk
+It works. Most of the time.
+If something is not working:
+1) check DISPLAY environment variable and xhost configuration
+   ("xhost +b0dap08" helps!)
+2) change computer. It works on b0dap08, but not on some other computers.
+
+Requirements
+------------
+
+svtvme library
+jsvtvme (java version of svtvme library)
+java
+jpython
+
+Have a look at ~cozzi/vme/svtLurk (it's a shell script) to see the exact
+setup needed to run the program.
+
+Explanation
+-----------
+
+svtLurk is a shell script which setups the environment and invokes the jpython
+interpreter.
+
+svtClasses.py is a jpython file which contains some class definitions, useful
+to use jsvtvme library in an object-oriented way. This file could be useful
+for other people too. It should also run on CPython (but I'm not sure: there
+are some circular reference; Java has got a true garbage collector, while
+CPython uses reference counting. If you try, let me know.)
+
+svtLurk.py is the graphical interface. It uses Swing to display the data.
+There is one svtMonitor (the window with the eight buttons); when you press a
+button, a crateMonitor is created. It then reads its configuration file and
+creates some boardMonitor according to the configuration file.
+Every boardMonitor knows which spy it should monitors, and creates the
+spyMonitors.
+Every two seconds (the time is configurable), the timer ticks and tells the
+svtMonitor to update itself. svtMonitor asks every open crateMonitor to update.
+Every crateMonitor asks its boardMonitor to update, and these in turn ask every
+spyMonitor to update. Very slow, don't you think? And consider that the program
+is written in JPython...
+
+b0svt0[0-7].config are the crate configuration files. If you swap boards in
+the crate, you don't even need to change the python file: just update these
+files. They are really simple to use!
+
+GIF/[green|yellow|red].gif are the icons used for the LEDs. I found
+these pictures on the net (they were bullets for web pages).
+
+Comments
+--------
+
+I used RCS (Revision Control System) for svtClasses.py and svtLurk.py.
+If you want to go back to an older version, you can.
+Just read the RCS man pages!
+
+Contact
+-------
+
+Federico Cozzi
+cozzi@fnal.gov
+federico.cozzi@sns.it

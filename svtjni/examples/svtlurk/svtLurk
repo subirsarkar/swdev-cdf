@@ -1,0 +1,5 @@
+#!/bin/tcsh
+setup java v1_2_2
+setup svtvme -d
+setup jpython
+jpython svtLurk.py

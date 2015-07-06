@@ -1,0 +1,861 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>  
+    A Brief Tutorial on Java/Jython Interface to the SVTVME library 
+</TITLE>
+<!-- Changed by: Subir Sarkar, 31-Aug-2001 -->
+</HEAD>
+
+<BODY BGCOLOR="#ffffff" LINK="blue" VLINK="red">
+
+<H2>
+<FONT color=green>Java</FONT>/<FONT color=SlateBlue>Jython</FONT> Interface to the 
+<FONT color=CadetBlue>svtvme</FONT> Library
+</H2>
+
+<H3>Introduction</H3>
+
+<P> 
+The <FONT color=green>Java</FONT> Native Interface (<FONT color=green>JNI</FONT>) over the 
+<FONT color=CadetBlue>svtvme</FONT> library allows us to build <FONT color=green>Java</FONT> 
+applications which can access SVT functionalities. More importantly, the interface 
+facilitates scripting and interactive debugging of the library using 
+<FONT color=SlateBlue>JPython/Jython</FONT>, which is an implementation of 
+<FONT color=magenta>Python</FONT> in <FONT color=green>Java</FONT>. A convenient 
+interactive debugging tool for probing boards, examining spy buffers, reading/writing 
+word(s) etc. helps in a big way during board diagnostic tests. 
+</P>
+
+<P>
+<FONT color=magenta>Python</FONT> scripting/prototyping environment is quite pleasant and 
+productive. It is an ideal language for gluing together components to create test suites 
+quickly without the need of compilation, declaration of variables etc. The true power of a 
+scripting framework lies in the ability of calling functions in an arbitrary order. The use 
+of <FONT color=SlateBlue>Jython</FONT> makes the complete Java API available to a 
+scripting environment. In particular, it unleashes all the power of 
+<FONT color=Green>Java</FONT> as a graphics toolkit which makes it possible to create GUI 
+intensive applications quickly and efficiently. For all practical purposes, Python and Jython 
+have the same syntax and I'll use the two names interchangeably in this document. Also  JPython
+and Jython are synonymous and the latter is a successor to the former.
+
+</P>
+
+<H3>Scripting Environment</H3>
+
+<P>
+A simple 
+</P>
+
+<BLOCKQUOTE>
+<PRE>setup svtvme -d</PRE> 
+</BLOCKQUOTE>
+<P>
+sets up the environment for <FONT color=Green>Java</FONT> and <FONT color=SlateBlue>Jython</FONT>. 
+This updates the environment variables CLASSPATH and LD_LIBRARY_PATH properly to point to the 
+<FONT color=SlateBlue>jsvtvme</FONT> package and the shared library created from the interface code 
+respectively. The commands which set the scripting environment are,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+b0dap30: setup java v1_2_2  # This is a feature of online installation of JPython
+b0dap30: setup jpython
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+Once the environment is set up, type jpython to invoke the interpreter,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+b0dap30: jpython
+...
+...
+JPython 1.1beta4 on java1.2.2 (JIT: javacomp)
+Copyright (C) 1997-1999 Corporation for National Research Initiatives
+>>>
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+The <FONT color=SlateBlue>jsvtvme</FONT> classes can be found in <CODE>${SVTVME_DIR}/jsvtvme/</CODE>,
+whereas the shared library <FONT color=magenta>SvtvmeImpl_`uname`.so</FONT> is kept in
+<CODE>${SVTVME_LD_PATH}</CODE>. 
+</P>
+
+<P>
+Once <FONT color=SlateBlue>JPython</FONT> starts one can import relevant classes interactively as 
+discussed in section <I>Annotated examples</I>. One can alternatively, import all that 
+is found in <A HREF="examples/getmod.py">${SVTVME_DIR}/Native/examples/getmod.py</A> as,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+>>> from getmod import *
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+which will set up the interactive session properly such that one can access the 
+<FONT color=CadetBlue>svtvme</FONT> library.
+</P>
+
+<H3>The Interface</H3> 
+
+<P> 
+Almost all the functionalities found in 
+<A HREF=../include/svtvme_public.h>$SVTVME_DIR/include/svtvme_public.h</A> 
+have been made available to <FONT color=green>Java</FONT> and hence to the scripting environment using 
+<FONT color=green>Java</FONT> Native Interface. The original svtvme functions are wrapped as static 
+methods in Java in <A HREF="jsvtvme/SvtvmeImpl.java">SvtvmeImpl.java</A>. A thin layer,
+<A HREF="jsvtvme/Board.java">Board.java</A>, is created further on top of SvtvmeImpl.java 
+in order to implement a truly Object Oriented interface to <FONT color=CadetBlue>svtvme</FONT>. 
+For Java and Jython programming, the basic interface need not be used as all the functionalities 
+are available from the Object Oriented (OO) wrapper. The API level documentation, 
+<A HREF="doc/jsvtvme/SvtvmeImpl.html">SvtvmeImpl.html</A> and 
+<A HREF="doc/jsvtvme/Board.html">Board.html</A>, should be consulted for any details on the 
+Object Oriented interface.
+
+
+<P>
+When a board object is created the underlying board is opened and a 
+<FONT color=brown>board handle</FONT> is returned
+which is stored in a member variable in the <FONT color=green>Board</FONT> class. 
+Subsequently, we can use the board object to perform any <FONT color=CadetBlue>svtvme</FONT> 
+operation as shown below,</P>
+
+<BLOCKQUOTE>
+<PRE>
+>>> board = Board("b0svt05", 8, AMS)
+>>> board.init()
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+The <FONT color=brown>board handle</FONT> which stores the pointer returned by 
+<FONT color=CadetBlue>svtvme_openBoard(crate, slot, boardType)</FONT> is a private attribute
+of the <FONT color=green>Board</FONT> class, along-with the other private attributes, 
+<FONT color=brown>crate, slot and boardType</FONT>. The <FONT color=green>Board</FONT> class
+also uses a map to correlate board type constants with board names. The board object instance, 
+therefore, knows enough about itself and when enquired provides meaningful information 
+about its location,
+
+<BLOCKQUOTE>
+<PRE>
+>>> board
+[AMS Board (Type: 32, Serial: xx) opened in Crate b0svt05 Slot 8]
+>>>
+</PRE>
+</BLOCKQUOTE>
+</P>
+
+<P>
+Although somewhat unnatural, the API has been wrapped using the exact calling sequence as 
+that found in the C library. Unfortunately, this forces us to take a few special measures in 
+<FONT color=green>Java</FONT>/<FONT color=SlateBlue>Jython</FONT>.
+</P>
+
+<UL> 
+<LI>
+<P>
+<FONT color=green>Java</FONT> does not allow passing an address of a primitive variable as an
+output argument. We, therefore, need to use a special Integer Holder object to know, for example, 
+the state of a register, as shown below,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+Java:
+import org.omg.CORBA.IntHolder;
+IntHolder state = new IntHolder();
+int error = board.getState(regId, state);
+System.out.println("State = " + state.value);
+
+Jython:
+state = org.omg.CORBA.IntHolder()
+error = board.getState(regId, state)
+print state.value
+</PRE>
+</BLOCKQUOTE>
+
+</LI>
+
+<LI>
+<P>
+Both input and output arrays must be declared and initialized <FONT color=brown>with proper size 
+before calling any methods which use them</FONT>. Segmentation fault may occur otherwise, as a result 
+of which the JVM 
+crashes. No explicit protection has been implemented yet. While returning an array through an output 
+argument, compatibility of <FONT color=green>Java</FONT> and <FONT color=magenta>Python</FONT> arrays 
+further forces us to define a special kind of array,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+from jarray import array,zeros  #  Special to Jython to access Java arrays
+data = zeros(nw, "i") #   nw - Array dimension, "i" - data-type
+</PRE>
+</BLOCKQUOTE>
+</LI>
+</UL>
+
+<P>
+Once the above two points are understood properly, accessing <FONT color=CadetBlue>svtvme</FONT> library from 
+<FONT color=SlateBlue>Jython</FONT> is quite straight-forward.
+</P>
+
+<P>
+<FONT color=green>Java</FONT> package and class names protect namespace. We can therefore, specially 
+for the purpose of <FONT color=SlateBlue>Jython</FONT> scripting, use shorter method names unambiguously. 
+All the methods in the Object Oriented interface use simplified naming convention. 
+As a result, we can call the C method 
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+svtvme_getState(board, REGISTER, &state)
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+in <FONT color=green>Java</FONT>/<FONT color=SlateBlue>Jython</FONT> as
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+board.getState(REGISTER, state)
+</PRE>
+</BLOCKQUOTE>
+
+<P> 
+In addition to this, some of the frequently used <FONT color=SlateBlue>getState(..), setState(..)</FONT>
+calls, like freeze, unfreeze have been implemented as freeze(), release() methods.
+</P>
+
+<H3>Annotated Examples</H3>
+
+<P>
+In this section we shall follow a couple of short <FONT color=SlateBlue>Jython</FONT> programs 
+step by step and show how to prototype an application with <FONT color=magenta>Python</FONT> 
+effectively. More examples can be found in <FONT color=brown>${SVTVME_DIR}/Native/examples</FONT>,
+</P>
+
+<P>
+
+<UL>
+
+<LI>Java :
+
+<UL>
+  <LI><A HREF="examples/AmsTest.java">AmsTest.java</A></LI>
+  <LI><A HREF="examples/FreezeMonitor.java">FreezeMonitor.java</A></LI>
+</UL>
+</LI>
+
+<LI>Jython:
+
+<UL>
+  <LI><A HREF="examples/sc_state.py">sc_state.py</A></LI>
+  <LI><A HREF="examples/startup.py">startup.py</A></LI>
+  <LI><A HREF="examples/snapshot.py">snapshot.py</A></LI>
+  <LI><A HREF="examples/svtlurk/svtClasses.py">svtlurk/svtClasses.py</A></LI>
+  <LI><A HREF="examples/svtlurk/svtLurk.py">svtlurk/svtLurk.py</A></LI>
+</UL>
+
+</LI>
+</UL>
+</P>
+
+<H4>Setting up the Session</H4>
+
+<P>
+At the onset of an interactive session (or in a script) we import certain library definitions
+for subsequent use. The typical import statements for an interactive session are the following,
+</P>  
+
+<BLOCKQUOTE>
+<PRE>
+import sys                            # system module
+import os                             # Operating system
+import java                           # Java proper
+# Time package
+from time import asctime, localtime, time, sleep      
+from javax.swing import *             # Swing package
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+The <FONT color=CadetBlue>jsvtvme </FONT> library is made visible by making the following 
+<FONT color=brown>obligatory</FONT> import statements.
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+# Loads the shared library of interface code
+java.lang.System.loadLibrary("SvtvmeImpl")  
+import jsvtvme                            # Make the package available 
+from jsvtvme import Board,SvtvmeConstants # Import all the function definitions 
+from jsvtvme.Board import *               #
+from jsvtvme.SvtvmeConstants import *     # Implements the SvtvmeConstants interface
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+As discussed above, to follow the exact calling sequence as in the C library and to
+access <FONT color=green>Java</FONT> arrays from <FONT color=SlateBlue>Jython</FONT>,
+we have to import the following,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+from org.omg.CORBA import IntHolder   # state = IntHolder()
+                                      # svt.getState(board, REGISTER, state)
+                                      # print state.value
+from jarray import array,zeros        # Special to Jython to access Java arrays
+                                      # data = zeros(ndim, "i")
+</PRE>
+</BLOCKQUOTE>
+
+<H4> Example 1: Master Spy Control Board</H4>
+<P>
+Let us now try to find the Spy Control board which is master enabled.
+</P>
+
+<A HREF=examples/spy_master.py>$SVTVME_DIR/Native/examples/spy_master.py</A>
+
+<BLOCKQUOTE>
+<PRE>
+state = IntHolder()                         
+nCrates = 8
+
+# Define a Python method
+def getMaster(index):
+   crate = "b0svt0"+str(i)    # Build crate name by string concatenation
+   spy = Board(crate, 3, SC)  # Open SC boards in turn
+
+   # Check whether this board is a master
+   error = spy.getState(SC_JUMPER_MASTER, state)     
+   print "Master Status = ", state.value, \
+         " for SC in crate ", crate  # Tell us
+   spy.closeBoard()  # Close this board
+
+# Loop over all the crate
+for i in range(nCrates):
+   getMaster(i)
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+Here is the output of the above program,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+Master Status =  0  for SC in crate  b0svt00
+Master Status =  0  for SC in crate  b0svt01
+Master Status =  0  for SC in crate  b0svt02
+Master Status =  0  for SC in crate  b0svt03
+Master Status =  0  for SC in crate  b0svt04
+Master Status =  1  for SC in crate  b0svt05
+Master Status =  1  for SC in crate  b0svt06
+Master Status =  1  for SC in crate  b0svt07
+</PRE>
+</BLOCKQUOTE>
+
+<H4>Example 2: Status of a Hit Finder Board</H4>
+<P>
+We show below another short example which can be used as a script, 
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+jpython hf.py b0svt05 5 1000
+</PRE>
+
+
+<A HREF=examples/hf.py>$SVTVME_DIR/Native/examples/hf.py</A>
+
+
+<PRE>
+# Get the command line argument
+crate  = sys.argv[1]
+slot   = int(sys.argv[2])
+nWords = int(sys.argv[3])
+
+# Define a function to customize printing
+def print_hex(data, fm='6.6'):
+  for i in range(len(data)):
+    format = "%"+fm+"x"
+    if (i == 0) or (i % 10):
+      print format % data[i],
+    else:
+      print "\n"+format % data[i],
+  print "\n"
+
+
+hfB  = Board(crate, slot, HF) # open the Hit Finder board
+spyB = Board(crate, 3, SC)    # open the Spy Control board
+
+data = zeros(nWords,'i') # Initialize array which will hold data
+state = IntHolder()      # Integer Holder object as the 3rd argument of getState()
+
+spyB.freeze()            # Freeze the system
+
+# Loop over all the Spy Buffers
+for i in range(11):
+  if i == 10:
+      reg = 'HF_OUT_SPY'
+  else:
+      reg = 'HF_ISPY_' + str(i)
+  # Freeze bit
+  print 'isFrozen(hf,' + reg + ')',  hfB.isFrozen(eval(reg))
+
+  # Wrap bit
+  print 'isWrapped(hf,' + reg + ')', hfB.isWrapped(eval(reg))
+
+  # Spy Counter
+  print 'spyCounter(hf,'+ reg + ')', hfB.spyCounter(eval(reg))
+ 
+  # Read data
+  error = hfB.readSpyTail(eval(reg), nWords, data)
+
+  # Print out now
+  if data:
+    if i < 10:
+      data = filter(lambda x: (x & 0xf000) != 0xc000, data)
+      data = map(lambda x: x & 0xffff, data)
+      print_hex(data, '4.4')
+    else:
+      print_hex(data)
+spyB.release()         # release freeze
+spyB.closeBoard();     # Done, close boards
+hfB.closeBoard();
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+which results in the following,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+isFrozen(hf,HF_ISPY_0) => 1 
+isWrapped(hf,HF_ISPY_0) => 1  
+spyCounter(hf,HF_ISPY_0) => 6441
+fb2d dce1 3ee4 0b1e 2068 9307 1ed3 4bfa 1b3c 
+
+isFrozen(hf,HF_ISPY_1) => 1 
+isWrapped(hf,HF_ISPY_1) => 1  
+spyCounter(hf,HF_ISPY_1) => 59158
+fb2d dce1 3ee4 0b1e 2068 9307 1ed3 4bfa 1b3c 
+
+..................
+etc.
+</PRE>
+</BLOCKQUOTE>
+
+<H3><FONT color=SlateBlue>jsvtvme</FONT> Library</H3> 
+<UL>
+  <LI>Constants</LI> 
+  <UL>
+    <LI><A HREF="jsvtvme/SvtvmeConstants.java">SvtvmeConstants.java</A></LI><BR>
+     This Java interface contains all the constants defined in    
+     <A HREF=../include/svtvme_public.h>$SVTVME_DIR/include/svtvme_public.h</A> as
+     <FONT color=CadetBlue>public static final int</FONT> variables. Any 
+     <FONT color=SlateBlue>jsvtvme</FONT> application should either use qualified name 
+      SvtvmeConstants.NAME_OF_THE_CONSTANT or implement the interface to be able to 
+      use unqualified names.
+  </UL>
+  <LI>Methods</LI> 
+  <UL>
+    <LI>
+     <A HREF="jsvtvme/SvtvmeImpl.java">SvtvmeImpl.java</A><BR>
+     Almost all the functions found in the <FONT color=CadetBlue>svtvme</FONT> library are 
+     declared here as <FONT color=CadetBlue>public static native int</FONT> and subsequently the 
+     native code is implemented in <A HREF="src/SvtvmeImpl.c">SvtvmeImpl.c</A>.
+    </LI>
+    <LI>
+    <A HREF="jsvtvme/Board.java">Board.java</A><BR>
+     A simple Object Oriented wrapper over SvtvmeImpl.java which is what should be used 
+     for scripting as well as for application development. This class also provides a number
+     of convenience methods to overcome the inconvenience(discussed in section 
+     <I>The Interface</I>) introduced by the fact that the basic <FONT color=green>JNI</FONT> 
+     follows the same calling conventions as in the original C library.
+    </LI>
+  </UL>
+</UL>
+
+We list below the methods implemented in <FONT color=brown>Board.java</FONT> and highlight 
+the most frequently used ones and the ones which contain special type of arguments.
+
+<UL>
+<LI> Global </LI>
+  <UL>
+    <LI> public static int initialise()</LI>
+    <LI> public static int setGlobalFlag(final int flag, int value)</LI>
+    <LI> public static int getGlobalFlag(final int flag, 
+           <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+  </UL>
+
+<LI>Board def/del/setup (constructor/destructor/modifiers) </LI>
+  <UL>
+    <LI> public int <FONT color=green>closeBoard</FONT>()</LI>
+    <LI> public int disableFisionErrorMessages()</LI>
+    <LI> public int enableFisionErrorMessages()</LI>
+    <LI> public int setBoardFlag(final int flag, int value)</LI>
+    <LI> public int getBoardFlag(final int flag, 
+              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+    <LI> public int setBoardDebugFile(String filename)</LI>
+  </UL>
+
+<LI>Board enquiry (accessors) </LI>
+  <UL>
+    <LI> public static int printObjects(int boardType)</LI>
+    <LI> public int <FONT color=green>getBoardIdentifier</FONT>( 
+                                  <FONT color=brown>org.omg.CORBA.IntHolder</FONT> type, 
+                                  <FONT color=brown>org.omg.CORBA.IntHolder</FONT> serialNum)</LI>
+    <LI> public int boardId()</LI>
+    <LI> public int boardSn()</LI>
+    <LI> public static int probeId(final String crate, final int slot)</LI>
+    <LI> public int <FONT color=green>boardType</FONT>()</LI>
+    <LI> public int <FONT color=green>boardSlot</FONT>()</LI>
+    <LI> public int <FONT color=green>boardCrate</FONT>(
+                                  <FONT color=brown>org.omg.CORBA.StringHolder</FONT> crate)</LI>
+    <LI> public static int <FONT color=green>boardName</FONT>(final int boardId, 
+                                  <FONT color=brown>org.omg.CORBA.StringHolder</FONT> boardName)</LI>
+    <LI> public static int nSpy(final int boardId)</LI>
+    <LI> public static int getRegList(int boardType, int max, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nReg, int [] regIds)</LI>
+    <LI> public static int getFifoList(int boardType, int max, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nFifo, int  [] fifoIds)</LI>
+    <LI> public static int getMemList(int boardType, int max, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nMem,  int [] memIds)</LI>
+    <LI> public static int getSpyList(int boardType, int max, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nSpy, int [] spyIds)</LI>
+  </UL>
+
+<LI>Objects enquiry (accessors)</LI>
+  <UL>
+    <LI> public static int <FONT color=green>stringToObject</FONT>(final String objectName)</LI>
+    <LI> public static int <FONT color=green>objectName</FONT>(final int objId, 
+                                  <FONT color=brown>org.omg.CORBA.StringHolder</FONT> objName)</LI>
+    <LI> public static int <FONT color=green>longName</FONT>(final int objId, 
+                                  <FONT color=brown>org.omg.CORBA.StringHolder</FONT> objName)</LI>
+    <LI> public static int <FONT color=green>shortName</FONT>(final int objId, 
+                                  <FONT color=brown>org.omg.CORBA.StringHolder</FONT> objName)</LI>
+    <LI> public static int address(final int objectId)</LI>
+    <LI> public static int nWords(final int objectId)</LI>
+    <LI> public static int mask(final int objectId)</LI>
+    <LI> public static int shift(final int objectId)</LI>
+  </UL>
+
+<LI>Basic VME actions</LI>
+  <UL>
+    <LI> public int <FONT color=green>init</FONT>()</LI>
+    <LI> public int <FONT color=green>setTmode</FONT>()</LI>
+    <LI> public int <FONT color=green>isTmode</FONT>()</LI>
+    <LI> public int <FONT color=green>isHeld</FONT>()</LI>
+    <LI> public int <FONT color=green>isEmpty</FONT>(final int fifoId)</LI>
+    <LI> public int <FONT color=green>getState</FONT>(final int regId, 
+                                  <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+    <LI> public int <FONT color=green>setState</FONT>(final int regId, int state)</LI>
+    <LI> public int <FONT color=green>checkState</FONT>(final int regId, int state)</LI>
+    <LI> public int readFifoMode(final int regId, int nw, int [] data)</LI>
+    <LI> public int writeFifoMode(final int regId, int nw, int [] data)</LI>
+    <LI> public int <FONT color=green>readMemory</FONT>(final int memId, 
+                              int ndata, int [] data)</LI>
+    <LI> public int <FONT color=green>writeMemory</FONT>(final int memId,
+                              int ndata, int [] data)</LI>
+  </UL>
+
+<LI>Memory pieces</LI>
+  <UL>
+    <LI> public int <FONT color=green>readMemoryFragment</FONT>(final int memId,
+                              int offset, int nw, int [] data)</LI>
+    <LI> public int <FONT color=green>writeMemoryFragment</FONT>(final int memId,
+                              int offset, int nw, int [] data)</LI>
+  </UL>
+
+<LI>Spy Buffer accessors </LI>
+  <UL>
+    <LI> public static int SpyRamId(final int spyId)</LI>
+    <LI> public int <FONT color=green>spyCounter</FONT>(final int spyId)</LI>
+    <LI> public int <FONT color=green>isFrozen</FONT>(final int spyId)</LI>
+    <LI> public int <FONT color=green>isWrapped</FONT>(final int spyId)</LI>
+    <LI> public static int deltaSpy(final int spyId, int end, int start)</LI>
+    <LI> public int <FONT color=green>resetSpy</FONT>(final int spyId)</LI>
+    <LI> public int <FONT color=green>readSpyTail</FONT>(final int spyId, int nw, int [] data)</LI>
+    <LI> public int <FONT color=green>readAllSpy</FONT>(final int spyId, int ndata, int [] data)</LI>
+</UL>
+
+<LI>Data send/read</LI>
+  <UL>
+    <LI> public int <FONT color=green>sendWord</FONT>(int word)</LI>
+    <LI> public int <FONT color=green>sendDataOnce</FONT>(int ndata, int [] data, int speed)</LI>
+    <LI> public int sendDataLoop(int ndata, int [] data)</LI>
+    <LI> public int resendDataOnce()</LI>
+    <LI> public int resendDataLoop()</LI>
+    <LI> public int resendData()</LI>
+    <LI> public int <FONT color=green>isLast</FONT>(final int word)</LI>
+    <LI> public int <FONT color=green>readFifo</FONT>(final int fifoId, int nw, int [] data)</LI>
+    <LI> public int <FONT color=green>readAllFifo</FONT>(final int fifoId, int maxWords,
+                              int [] data, <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+  </UL>
+<LI>Hardware tests </Li>
+  <UL>
+    <LI> public int <FONT color=green>testRegister</FONT>(final int regId)</LI>
+    <LI> public int writeVerifyMemory(final int memId, int ndata, 
+                              int [] data, int stopFlag, <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nerr)</LI>
+    <LI> public int checkMemory(final int memId, int ndata, 
+                              int [] data, int stopFlag, <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+    <LI> public int checkMemoryFragment(final int memId, 
+                              int offset, int ndata, int [] data, int stopFlag, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nerr)</LI>
+    <LI> public int <FONT color=green>testMemory</FONT>(final int memId, int ntimes,
+                              int stopFlag, <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+    <LI> public int <FONT color=green>testIDPROM</FONT>()</LI>
+  </UL>
+  
+<LI>Low level VME, hopefully never needed by user </LI>
+  <UL>
+    <LI> public int readWord(final int addr, 
+                             <FONT color=brown>org.omg.CORBA.IntHolder</FONT> state)</LI>
+    <LI> public int readWords(final int addr, int [] data, int ndata)</LI>
+    <LI> public int writeWord(final int addr, int data)</LI>
+    <LI> public int writeWords(final int addr, int ndata, int [] data)</LI>
+    <LI> public int readWordsAl(final int  addr, int [] data, int ndata)</LI>
+    <LI> public int writeWordsAl(final int addr, int ndata, int [] data)</LI>
+  </UL>
+  
+<LI>Checksum</LI>
+  <UL>
+    <LI> public int cksumMemory(final int memId, 
+                              <FONT color=brown>org.omg.CORBA.IntHolder</FONT> crc)</LI>
+    <LI> public int cksumBlock(final int addr, int mask, 
+                              int ndata, <FONT color=brown>org.omg.CORBA.IntHolder</FONT> crc)</LI>
+  </UL>
+<LI>Misc</LI>
+  <UL>
+    <LI> public static int rand(int mask)</LI>
+  </UL>
+
+<LI>Obsolescent </LI>
+  <UL>
+    <LI> public int getBoardType()</LI>
+    <LI> public static int length(final int objectId)</LI>
+  </UL>
+<LI>Convenience </LI>
+  <UL>
+    <LI>public String what()</LI>
+    <LI>public void <FONT color=CadetBlue>freeze</FONT>()</LI>
+    <LI>public void <FONT color=CadetBlue>release</FONT>()</LI>
+    <LI>public int read(final int regId) </LI>
+    <LI>public int write(final int regId, int value) </LI>
+    <LI>public int [] readSpy(final int spyId, int nw) </LI>
+    <LI>public String getCrate()</LI>
+    <LI>public int getSlot()</LI>
+    <LI>public String toString()</LI>
+    <LI>public int getRegList(int max,  
+          <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nReg,  int [] regIds)</LI>
+    <LI>public int getFifoList(int max, 
+          <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nFifo, int [] fifoIds)</LI>
+    <LI>public int getMemList(int max,  
+          <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nMem,  int [] memIds)</LI>
+    <LI>public int getSpyList(int max,  
+          <FONT color=brown>org.omg.CORBA.IntHolder</FONT> nSpy,  int [] spyIds)</LI>
+  </UL>
+</UL>
+
+<H3>Technical Details</H3> 
+
+<P>
+In this section I shall briefly describe how one can regenerate the JNI to svtvme as and when
+needed. In particular, whenever new constants are added to the header file, one must regenerate 
+the interface constants file (<FONT color=brown>SvtvmeConstants.java</FONT>) and recompile, and then
+create the new shared library, otherwise the <FONT color=green>Java</FONT> application will try to
+access wrong registers values, if the new additions break the old order. 
+</P>
+
+<P>
+The Makefile is not yet automatic enough to take care of everything, so the following 
+technical discussion may help one in regenerating the interface correctly.
+</P>
+
+<P>
+I have divided the svtvme_public.h into two parts
+</P>
+
+<UL>
+<LI> <FONT color=brown>SvtvmeConstants.java</FONT>  -  
+     A Java interface files containing declaration  and definition of constants alone. One can
+     use the constants in a Java program as  SvtvmeConstants.NAME_OF_THE_CONSTANT, or
+     alternatively one can implement the interface file in one's class and then use unqualified
+     names.</LI>
+
+<LI> <FONT color=brown>SvtvmeImpl.java</FONT>  -  
+     All the public methods of svtvme go here as static. If new functions are added to 
+     svtvme_public.h, one has to add the corresponding native methods in this file, compile 
+     and generate the JNI header file with the new functions and implement the functions in 
+     the corresponding C file as described below.</LI>
+</UL>
+
+<P>
+All the Java classes are in the package (module) named 'jsvtvme'. For <FONT color=SlateBlue>Jython</FONT>
+it is absolutely needed. When one wants to import any definition, <FONT color=SlateBlue>Jython</FONT> 
+looks for a module which should contain those definitions and a <FONT color=SlateBlue>Jython</FONT> 
+module maps to a Java package.
+</P>
+
+<H4>Creating Interface Constants:</H4>
+
+<BLOCKQUOTE>
+<PRE>
+setup svtvme -d (either on Linux or on Irix)
+cd $SVTVME_DIR/Native/tool
+gmake clean    # delete the C executable which creates the interface file
+gmake all      # Compile, execute 'GetConstants' and create the interface file
+               # and copy it to $SVTVME_DIR/Native/src directory. Thanks to
+               # Stefano one can retrieve all the defined objects in an 
+               # automatic way now.
+cd ..
+setup java -q java2  # (if not done already)
+gmake java     # Only the modified files should be recompiled, which is not the case yet!!
+gmake doc      # this should contain class specific documentation
+
+</PRE>
+</BLOCKQUOTE>
+
+<h4>Creating the JNI shared library (both on Linux and Irix)</h4>
+
+<BLOCKQUOTE>
+<PRE>
+gmake clean
+gmake depend
+gmake
+</PRE>
+</BLOCKQUOTE>
+
+All these can be avoided as well and from Native directory a <I>gmake all</I> command
+should build everything now.
+
+<P>
+We are ready to use the interface now. The shared libraries are linked from 
+$SVTVME_LD_PATH so in the java program on a particular platform
+<FONT color=brown>java.lang.System.loadLibrary("SvtvmeImpl")</FONT> call is 
+guaranteed to load the correct architecture.
+</P>
+
+<h4>The Hard Part: Implementing the Interface</h4>
+
+<P>
+Due to lack of a safe automatic interface generator all the interface code 
+has been created manually. Generating wrapper code depends on the number, type and nature
+of the arguments passed to the C functions. Depending on the C function interface, 
+the <FONT color=green>JNI</FONT> code might become quite complex. In the following I'll 
+explain how we can generate the interface code for a very simple imaginary C function.
+</P>
+
+<P>
+The prototype of the new C function 
+</P>
+
+
+<BLOCKQUOTE>
+<PRE>
+int svtvme_getSomething(int board);
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+is translated in SvtvmeImpl.java as
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+# self is boardHandle here
+public static native int svtvme_getSomething(int self);  // Native method declaration
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+The specifier <CODE>native</CODE> in the method tells and requires that the method does not 
+have a body in Java. 
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+gmake classes   # to compile SvtvmeImpl.java
+gmake header    # to create the header file adding the new function prototype
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+In <A HREF=include/jsvtvme_SvtvmeImpl.h>${SVTVME_DIR}/include/jsvtvme_SvtvmeImpl.h</A>
+we get a function prototype as the following,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+JNIEXPORT jint JNICALL 
+Java_jsvtvme_SvtvmeImpl_svtvme_1getSomething (JNIEnv *, jobject, jint);
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+We require to implement the function in <A HREF=src/SvtvmeImpl.c>${SVTVME_DIR}/src/SvtvmeImpl.c</A>,
+which in this case is simple,
+</P>
+
+<BLOCKQUOTE>
+<PRE>
+/*
+ * Implementation of <svtvme_getSomething>
+ */
+JNIEXPORT jint JNICALL 
+ Java_jsvtvme_SvtvmeImpl_svtvme_1getSomething
+  (JNIEnv *env, jobject obj, jint self)
+{
+   return ((jint)svtvme_setSomething(getCHandle(board));
+}
+</PRE>
+</BLOCKQUOTE>
+
+<H3>Comments</H3>
+
+<P> 
+<FONT color=green>Java</FONT>/<FONT color=SlateBlue>Jython</FONT> interface over svtvme 
+provides an interactive/scripting environment which comes very handy for 
+quick-and-dirty tests as well as for writing prototypes for larger applications 
+in the most efficient manner. One drawback of <FONT color=SlateBlue>Jython</FONT> is 
+that it does not by itself support command history and command line editing which 
+is essential in interactive sessions. One can however, 
+start <FONT color=SlateBlue>jython</FONT> using <FONT color=brown>rlterm</FONT>, as 
+<FONT color=CadetBlue>rlterm jython</FONT>, which offers generic command line facilities or 
+use an emacs shell while waiting for Java port of readline package to be fully 
+implemented. <FONT color=brown>rlterm</FONT> is a part of the scientific 
+programming language yorick which can be found in
+<A HREF="http://www.ibiblio.org/pub/Linux/apps/math/matrix/yorick-1.4.src.tar.gz">
+yorick-1.4.src.tar.gz</A>. The other important concern is related to the fact that 
+any illegal operation results in crashing the underlying Java Virtual Machine 
+<FONT color=SlateBlue>Jython</FONT> runs on. This is an in-built weakness of 
+<FONT color=green>JNI</FONT> and we need to implement safety in the original svtvme 
+functions whereever possible such that illegal operations are trapped and avoided. 
+This is no longer strictly true either as 
+<FONT color=CadetBlue>svtvme</FONT> library itself 
+now provides a robust exception handling mechanism. Therefore, the 
+<FONT color=SlateBlue>jython</FONT> scripting environment can now be used in an efficient 
+and safe way.
+</P> 
+
+<H3>References</H3>
+<UL>
+  <LI><A HREF="http://java.sun.com"> Official Java Home</A></LI>
+  <LI><A HREF="http://www.python.org"> Python Home</A>, look for all Python related info here</LI>
+  <LI><A HREF="http://www.jpython.org"> JPython Home</A>, no longer maintained beyond version 1.1</LI>
+  <LI><A HREF="http://www.jython.org"> Jython Home</A>, successor to JPython, corresponds to Python 2</LI>
+</UL>
+<H4>Subir Sarkar<BR> Last update 08/31/2001 </H4>
+</BODY> 
+</HTML>
